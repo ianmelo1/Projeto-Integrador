@@ -1,14 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios</title>
-    <link rel="website icon" type="image/png" href="https://media-public.canva.com/ZlHMQ/MADhH6ZlHMQ/3/tl.png" />
-    <link rel="stylesheet" href="stylestest.css" />
+    <title>Relatórios de Desempenho</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Seus estilos atuais */
+    </style>
 </head>
 <body>
-    <h1>aq vai ser o relatorio pessoal do aluno feito pela integraçao da ia no projeto</h1>
+    <!-- Container principal -->
+    <div class="container">
+        <h1>Relatórios de Desempenho</h1>
+        
+        <div class="input-container">
+            <label for="studentEmail">Email do Aluno:</label>
+            <input type="email" id="studentEmail" placeholder="ex: aluno@escola.com">
+            <button id="generateBtn">Gerar Relatórios</button>
+        </div>
+        
+        <div class="report-container">
+            <h2>Relatório Textual</h2>
+            <div id="textReport">Aguardando solicitação...</div>
+        </div>
+        
+        <div class="report-container">
+            <h2>Relatório Gráfico</h2>
+            <div id="chartContainer" style="width: 80%; margin: 0 auto;">
+                <canvas id="gradesChart"></canvas>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        let gradeChart = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('generateBtn');
+            btn.addEventListener('click', loadReports);
+        });
+
+ async function loadReports() {
+  const email = document.getElementById('studentEmail').value.trim();
+  
+  if (!email) {
+    alert('Por favor, insira o email do aluno');
+    return;
+  }
+
+  try {
+    document.getElementById('textReport').textContent = "Carregando...";
+    
+    // 1. Busca relatório textual
+    const textResp = await fetch(`http://localhost:8080/api/reports/text/${encodeURIComponent(email)}`);
+    const textData = await textResp.json();
+    document.getElementById('textReport').textContent = textData.report;
+    
+    // 2. Busca dados do gráfico com tratamento robusto
+    const graphResp = await fetch(`http://localhost:8080/api/reports/graph/${encodeURIComponent(email)}`);
+    
+    // Verifica se a resposta é JSON
+    const contentType = graphResp.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await graphResp.text();
+      throw new Error(`Resposta inválida: ${text.substring(0, 50)}...`);
+    }
+    
+    const graphData = await graphResp.json();
+    
+    if (!graphData.success) {
+      throw new Error(graphData.message || 'Erro no gráfico');
+    }
+    
+    renderChart(graphData.chartData);
+    
+  } catch (error) {
+    console.error("Erro completo:", error);
+    document.getElementById('textReport').textContent += `\n\nErro: ${error.message}`;
+  }
+}
+    </script>
 </body>
 </html>

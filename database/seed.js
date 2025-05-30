@@ -28,7 +28,7 @@ async function seed() {
         curso: "Inteligência Artificial",
         telefone: "(61)0000-0000",
         cargaHoraria: 3000,
-        semestre: 2,
+        semestre: 5,
       },
       {
         nome: "Ian",
