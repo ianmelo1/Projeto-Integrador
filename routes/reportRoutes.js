@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const reportController = require('../controllers/reportController');
+
 
 
 
@@ -21,20 +23,9 @@ const {
 } = require('../controllers/reportController');
 
 // Rotas atualizadas
-router.get('/text/:email', (req, res) => {
-  console.log('Rota text chamada'); // Debug
-  generateTextReport(req, res).catch(err => {
-    console.error('Erro na rota:', err);
-    res.status(500).json({ success: false, message: 'Erro interno' });
-  });
-});
 
-router.get('/graph/:email', (req, res) => {
-  console.log('Rota graph chamada'); // Debug
-  generateGraphReport(req, res).catch(err => {
-    console.error('Erro na rota:', err);
-    res.status(500).json({ success: false, message: 'Erro interno' });
-  });
-});
+// Rotas simplificadas
+router.get('/text/:email', reportController.generateTextReport);
+router.get('/graph/:email', reportController.generateGraphReport);
 
-module.exports = router;
+

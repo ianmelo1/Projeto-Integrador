@@ -2,31 +2,236 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios de Desempenho</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Seus estilos atuais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d1117;
+            min-height: 100vh;
+            padding: 20px;
+            color: #c9d1d9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        h1 {
+            background-color: #21262d;
+            color: #f0f6fc;
+            text-align: center;
+            padding: 24px;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 500;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .input-container {
+            padding: 24px;
+            background-color: #0d1117;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-weight: 500;
+            color: #f0f6fc;
+            font-size: 0.9rem;
+        }
+
+        #studentEmail {
+            flex: 1;
+            min-width: 250px;
+            padding: 8px 12px;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            transition: border-color 0.2s ease;
+        }
+
+        #studentEmail:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        #studentEmail::placeholder {
+            color: #7d8590;
+        }
+
+        #generateBtn {
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        #generateBtn:hover {
+            background-color: #2ea043;
+        }
+
+        #generateBtn:disabled {
+            background-color: #30363d;
+            color: #7d8590;
+            cursor: not-allowed;
+        }
+
+        .report-container {
+            margin: 0;
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .report-container:last-child {
+            border-bottom: none;
+        }
+
+        .report-container h2 {
+            background-color: #21262d;
+            color: #f0f6fc;
+            padding: 16px 24px;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-bottom: 1px solid #30363d;
+        }
+
+        #textReport {
+            padding: 24px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            white-space: pre-line;
+            min-height: 120px;
+            background-color: #0d1117;
+        }
+
+        #chartContainer {
+            padding: 24px;
+            background-color: #0d1117;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading {
+            color: #7d8590;
+            font-style: italic;
+        }
+
+        .error {
+            color: #f85149;
+            background-color: rgba(248, 81, 73, 0.1);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid rgba(248, 81, 73, 0.3);
+        }
+
+        .success {
+            color: #56d364;
+            background-color: rgba(86, 211, 100, 0.1);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid rgba(86, 211, 100, 0.3);
+        }
+
+        .message {
+            margin: 16px 24px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-weight: 400;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 6px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+
+            .input-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            #studentEmail {
+                min-width: 100%;
+            }
+
+            #textReport, #chartContainer {
+                padding: 20px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <!-- Container principal -->
     <div class="container">
         <h1>Relatórios de Desempenho</h1>
         
         <div class="input-container">
             <label for="studentEmail">Email do Aluno:</label>
-            <input type="email" id="studentEmail" placeholder="ex: aluno@escola.com">
+            <input type="email" id="studentEmail" placeholder="exemplo: aluno@escola.com">
             <button id="generateBtn">Gerar Relatórios</button>
         </div>
         
         <div class="report-container">
             <h2>Relatório Textual</h2>
-            <div id="textReport">Aguardando solicitação...</div>
+            <div id="textReport">Aguardando solicitação de relatório...</div>
         </div>
         
         <div class="report-container">
             <h2>Relatório Gráfico</h2>
-            <div id="chartContainer" style="width: 80%; margin: 0 auto;">
+            <div id="chartContainer">
                 <canvas id="gradesChart"></canvas>
             </div>
         </div>
@@ -37,48 +242,218 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('generateBtn');
+            const emailInput = document.getElementById('studentEmail');
+            
             btn.addEventListener('click', loadReports);
+            
+            emailInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    loadReports();
+                }
+            });
         });
 
- async function loadReports() {
-  const email = document.getElementById('studentEmail').value.trim();
-  
-  if (!email) {
-    alert('Por favor, insira o email do aluno');
-    return;
-  }
+        async function loadReports() {
+            const email = document.getElementById('studentEmail').value.trim();
+            
+            if (!email) {
+                showMessage('Por favor, insira o email do aluno', 'error');
+                return;
+            }
 
-  try {
-    document.getElementById('textReport').textContent = "Carregando...";
-    
-    // 1. Busca relatório textual
-    const textResp = await fetch(`http://localhost:8080/api/reports/text/${encodeURIComponent(email)}`);
-    const textData = await textResp.json();
-    document.getElementById('textReport').textContent = textData.report;
-    
-    // 2. Busca dados do gráfico com tratamento robusto
-    const graphResp = await fetch(`http://localhost:8080/api/reports/graph/${encodeURIComponent(email)}`);
-    
-    // Verifica se a resposta é JSON
-    const contentType = graphResp.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await graphResp.text();
-      throw new Error(`Resposta inválida: ${text.substring(0, 50)}...`);
-    }
-    
-    const graphData = await graphResp.json();
-    
-    if (!graphData.success) {
-      throw new Error(graphData.message || 'Erro no gráfico');
-    }
-    
-    renderChart(graphData.chartData);
-    
-  } catch (error) {
-    console.error("Erro completo:", error);
-    document.getElementById('textReport').textContent += `\n\nErro: ${error.message}`;
-  }
-}
+            if (!isValidEmail(email)) {
+                showMessage('Por favor, insira um email válido', 'error');
+                return;
+            }
+
+            try {
+                setLoadingState(true);
+                await loadTextReport(email);
+                await loadGraphReport(email);
+                showMessage('Relatórios gerados com sucesso!', 'success');
+            } catch (error) {
+                console.error("Erro completo:", error);
+                showMessage(`Erro ao carregar relatórios: ${error.message}`, 'error');
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        async function loadTextReport(email) {
+            const textReportDiv = document.getElementById('textReport');
+            textReportDiv.innerHTML = '<div class="loading pulse">Carregando relatório textual...</div>';
+            
+            const response = await fetch(`http://localhost:8080/api/reports/text/${encodeURIComponent(email)}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message || 'Erro no relatório textual');
+            }
+            
+            textReportDiv.innerHTML = data.report;
+            textReportDiv.classList.add('fade-in');
+        }
+
+        async function loadGraphReport(email) {
+            const response = await fetch(`http://localhost:8080/api/reports/graph/${encodeURIComponent(email)}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                throw new Error(`Resposta inválida: ${text.substring(0, 50)}...`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message || 'Erro no gráfico');
+            }
+            
+            renderChart(data.chartData);
+        }
+
+        function renderChart(chartData) {
+            const ctx = document.getElementById('gradesChart').getContext('2d');
+            
+            if (gradeChart) {
+                gradeChart.destroy();
+            }
+            
+            const config = {
+                type: chartData.type || 'bar',
+                data: {
+                    labels: chartData.data.labels,
+                    datasets: [{
+                        label: chartData.data.datasets[0].label || 'Notas',
+                        data: chartData.data.datasets[0].data,
+                        // Agora usa as cores que vêm do backend
+                        backgroundColor: chartData.data.datasets[0].backgroundColor || 'rgba(30, 64, 175, 0.8)',
+                        borderColor: chartData.data.datasets[0].borderColor || 'rgba(30, 64, 175, 1)',
+                        borderWidth: 1,
+                        borderRadius: 2,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                },
+                                color: '#c9d1d9'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(33, 38, 45, 0.95)',
+                            titleColor: '#f0f6fc',
+                            bodyColor: '#c9d1d9',
+                            borderColor: '#30363d',
+                            borderWidth: 1,
+                            cornerRadius: 4,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    if (value === 0) {
+                                        return `${context.dataset.label}: Nota não lançada`;
+                                    }
+                                    return `${context.dataset.label}: ${value}/10`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: {
+                                color: 'rgba(48, 54, 61, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                color: '#7d8590',
+                                callback: function(value) {
+                                    return value + '/10';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                color: '#7d8590'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            };
+            
+            gradeChart = new Chart(ctx, config);
+            document.getElementById('chartContainer').classList.add('fade-in');
+        }
+
+        function setLoadingState(isLoading) {
+            const btn = document.getElementById('generateBtn');
+            const emailInput = document.getElementById('studentEmail');
+            
+            if (isLoading) {
+                btn.textContent = 'Carregando...';
+                btn.disabled = true;
+                emailInput.disabled = true;
+            } else {
+                btn.textContent = 'Gerar Relatórios';
+                btn.disabled = false;
+                emailInput.disabled = false;
+            }
+        }
+
+        function showMessage(message, type) {
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} fade-in`;
+            messageDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(messageDiv, container.children[1]);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
     </script>
 </body>
 </html>
