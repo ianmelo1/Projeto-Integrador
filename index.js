@@ -47,6 +47,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/grades', authMiddleware,  gradeRoutes);
 app.use('/api/frequencia', authMiddleware, frequenciaRoutes); 
 
+
 // Rota de erros 404 (mantida igual)
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Rota não encontrada' });

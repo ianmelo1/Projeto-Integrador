@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const reportController = require('../controllers/reportController');
-
-
-
+const reportController = require('../controllers/reportController'); // ESSA LINHA É CRÍTICA
+// Adicione logs para verificar:
+console.log('Em reportRoutes.js - reportController:', reportController);
+if (reportController) {
+  console.log('Em reportRoutes.js - typeof reportController.generateTextReport:', typeof reportController.generateTextReport);
+}
 
 router.get('/grade/:alunoId', async (req, res) => {
   try {
@@ -29,3 +31,4 @@ router.get('/text/:email', reportController.generateTextReport);
 router.get('/graph/:email', reportController.generateGraphReport);
 
 
+module.exports = router;
