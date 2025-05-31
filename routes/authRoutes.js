@@ -4,6 +4,7 @@ const authController = require('../controllers/authController.js');
 const authMiddleware = require('../middlewares/authMiddleware.js');
 const boletimController = require('../controllers/boletimController.js')
 
+
 // Rota do Boletim
 router.get('/', authMiddleware, boletimController.getMeuBoletim);
 
