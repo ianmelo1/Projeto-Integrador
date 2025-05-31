@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,40 +8,167 @@
     <link rel="website icon" type="png" href="https://media-public.canva.com/ZlHMQ/MADhH6ZlHMQ/3/tl.png">
     <link rel="stylesheet" href="stylestest.css">
 </head>
+
 <body class="bodyfrequencia">
     <header class="header-boletim">
         Frequência
         <a class="sair" href="segundapg.html">Sair</a>
     </header>
 
-  <main class="container-boletim">
-
+    <main class="container-boletim" id="container-frequencias-principal">
         <section class="materia">
-            <h2 class="titulo-materia">Materia um</h2>
-            <div class="semestre">
-                <h3>1º Semestre</h3>
-                <p class="nota">frequencia:</p>
-            </div>
-
-        </section>
-
-        <section class="materia">
-            <h2 class="titulo-materia">Materia dois</h2>
-            <div class="semestre">
-                <h3>1º Semestre</h3>
-                <p class="nota">frequencia:</p>
-            </div>
-
-        </section>
-
-        <section class="materia">
-            <h2 class="titulo-materia">Materia tres</h2>
-            <div class="semestre">
-                <h3>1º Semestre</h3>
+            <h2 class="titulo-materia">Carregando...</h2>
+            <div>
+                <h3>&nbsp;</h3>
                 <p class="nota">frequencia:</p>
             </div>
         </section>
 
+        <section class="materia">
+            <h2 class="titulo-materia"></h2>
+            <div>
+                <h3>&nbsp;</h3>
+                <p class="nota">frequencia:</p>
+            </div>
+        </section>
+
+        <section class="materia">
+            <h2 class="titulo-materia"></h2>
+            <div>
+                <h3>&nbsp;</h3>
+                <p class="nota">frequencia:</p>
+            </div>
+        </section>
     </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+            const mainContainer = document.getElementById("container-frequencias-principal");
+            const sections = mainContainer.querySelectorAll('section.materia');
+
+            // Função para limpar/resetar uma seção específica
+            function resetSection(sectionElement) {
+                const h2 = sectionElement.querySelector('h2.titulo-materia');
+                const h3 = sectionElement.querySelector('div h3');
+                const pNota = sectionElement.querySelector('div p.nota');
+
+                if (h2) h2.textContent = '';
+                if (h3) h3.innerHTML = '&nbsp;'; // Usa &nbsp; para manter altura se o CSS depender disso
+                if (pNota) pNota.textContent = 'frequencia:';
+                sectionElement.style.display = 'none'; // Esconde a seção
+            }
+
+            // Reseta todas as seções inicialmente
+            sections.forEach(sec => resetSection(sec));
+
+            if (!token) {
+                if (sections.length > 0) {
+                    sections[0].style.display = 'block'; // Mostra a primeira seção para a mensagem
+                    const h2 = sections[0].querySelector('h2.titulo-materia');
+                    if (h2) h2.textContent = 'Sessão expirada ou inválida.';
+                    const pNota = sections[0].querySelector('div p.nota');
+                    if (pNota) pNota.textContent = 'Faça login novamente.';
+                } else {
+                    mainContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Sessão expirada. Faça login.</p>';
+                }
+                return;
+            }
+
+            async function fetchFrequenciaData() {
+                const endpoint = '/api/frequencia';
+
+                // Mostra mensagem de carregando na primeira seção disponível
+                if (sections.length > 0) {
+                    sections.forEach(sec => resetSection(sec)); // Limpa todas antes de mostrar carregando
+                    sections[0].style.display = 'block';
+                    const h2 = sections[0].querySelector('h2.titulo-materia');
+                    if (h2) h2.textContent = 'Buscando dados de frequência...';
+                } else {
+                    mainContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Buscando dados...</p>';
+                }
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        let errorMessage = `Erro HTTP: ${response.status} ${response.statusText}`;
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.message || errorData.error || errorMessage;
+                        } catch (e) { /* Usa erro HTTP padrão */ }
+                        throw new Error(errorMessage);
+                    }
+                    return await response.json();
+
+                } catch (error) {
+                    console.error("Falha ao buscar dados de frequência:", error);
+                    if (sections.length > 0) {
+                        sections.forEach(sec => resetSection(sec));
+                        sections[0].style.display = 'block';
+                        const h2 = sections[0].querySelector('h2.titulo-materia');
+                        if (h2) h2.textContent = 'Erro ao carregar frequência';
+                        const pNota = sections[0].querySelector('div p.nota');
+                        if (pNota) pNota.textContent = error.message;
+                    } else {
+                        mainContainer.innerHTML = `<p style="text-align:center; padding: 20px; color:red;">Erro: ${error.message}</p>`;
+                    }
+                    return []; // Retorna array vazio em caso de erro
+                }
+            }
+
+            function populateStaticFrequencia(frequenciaItems) {
+                // Limpa todas as seções antes de popular, caso o fetch tenha sido rápido e não tenha limpado antes
+                sections.forEach(sec => resetSection(sec));
+
+                if (!frequenciaItems || frequenciaItems.length === 0) {
+                    if (sections.length > 0) {
+                        sections[0].style.display = 'block';
+                        const h2 = sections[0].querySelector('h2.titulo-materia');
+                        if (h2) h2.textContent = 'Nenhuma frequência para exibir.';
+                        // Outros campos da primeira seção já foram resetados para vazio
+                    } else {
+                        mainContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Nenhuma frequência para exibir.</p>';
+                    }
+                    return;
+                }
+
+                const numItemsToDisplay = Math.min(frequenciaItems.length, sections.length);
+
+                for (let i = 0; i < numItemsToDisplay; i++) {
+                    const item = frequenciaItems[i];
+                    const section = sections[i];
+                    section.style.display = 'block'; // Torna a seção visível
+
+                    const h2 = section.querySelector('h2.titulo-materia');
+                    const h3Semestre = section.querySelector('div h3');
+                    const pFrequencia = section.querySelector('div p.nota');
+
+                    if (h2) h2.textContent = item.nomeMateria || 'N/A';
+                    if (h3Semestre) h3Semestre.textContent = item.semestre || 'N/A';
+                    if (pFrequencia) {
+                        const statusText = item.statusPorFrequencia || '';
+                        // Apenas texto, sem classes de status adicionais para não depender de CSS novo
+                        pFrequencia.textContent = `frequencia: ${item.frequencia || 'N/D'} ${statusText ? `(${statusText})` : ''}`;
+                    }
+                }
+
+               
+            }
+
+            // Inicia o processo
+            fetchFrequenciaData().then(data => {
+                populateStaticFrequencia(data);
+            });
+        });
+    </script>
+
 </body>
+
 </html>

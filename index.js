@@ -9,6 +9,9 @@ const seed = require('./database/seed');
 const authRouter = require("./routes/authRoutes");
 const boletimRouter = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const gradeRoutes = require('./routes/gradeRoutes');
+const frequenciaRoutes = require('./routes/frequenciaRoutes');
+const authMiddleware = require('./middlewares/authMiddleware');
 
 const app = express();
 
@@ -38,8 +41,11 @@ app.get('/api/test', (req, res) => {
 
 // Rotas principais (mantidas exatamente como estavam)
 app.use("/auth", authRouter);
+
 app.use('/api/boletim', boletimRouter);
 app.use('/api/reports', reportRoutes);
+app.use('/api/grades', authMiddleware,  gradeRoutes);
+app.use('/api/frequencia', authMiddleware, frequenciaRoutes); 
 
 // Rota de erros 404 (mantida igual)
 app.use((req, res) => {

@@ -6,19 +6,32 @@ const materiaSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  turma: {
+    type: String,
+    required: true
+  },
+  diaDaSemana: {
+    type: String,
+    required: true
+  },
   nota: {
     type: Number,
-    default: null 
+    default: null
+  },
+  frequenciaPercentual: {
+    type: Number,
+    min: 0,
+    max: 100,
   }
 }, { _id: false });
 
 const boletimSchema = new mongoose.Schema({
   aluno: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', 
+    ref: 'User',
     required: true
   },
-  nomeAluno:{
+  nomeAluno: {
     type: String,
     required: true
   },
@@ -26,11 +39,11 @@ const boletimSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  semestre: { 
+  semestre: {
     type: Number,
     required: true
   },
-  materias: [materiaSchema] 
+  materias: [materiaSchema]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Boletim', boletimSchema);

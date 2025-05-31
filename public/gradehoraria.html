@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>grade</title>
+    <title>Grade Horária Dinâmica</title>
     <link rel="website icon" type="png" href="https://media-public.canva.com/ZlHMQ/MADhH6ZlHMQ/3/tl.png">
     <link rel="stylesheet" href="stylestest.css">
 </head>
-
 
 <body class="bodygrade">
     <header class="header-boletim">
         Grade
         <a class="sair" href="segundapg.html">Sair</a>
     </header>
+
     <table class="table table-bordered table-striped table-hover responsive" id="dynamic-table">
         <thead>
             <tr role="row">
@@ -25,72 +25,144 @@
                 <th class="text-center">Horário</th>
             </tr>
         </thead>
-
         <tbody id="tbody-disc">
-            <tr>
-                <td class="text-center">Segunda-Feira</td>
-                <td class="text-center" id="curso"></td>
-                <td class="text-center" id="materia-um"></td>
-                <td class="text-center" id="turma"></td>
-                <td class="text-center">
-                    08:15 - 09:30 </td>
-            </tr>
-            <tr>
-                <td class="text-center">Segunda-Feira</td>
-                <td class="text-center" id="curso"></td>
-                <td class="text-center" id="materia-um"></td>
-                <td class="text-center" id="turma"></td>
-                <td class="text-center">
-                    09:45 - 11:00 </td>
-            </tr>
-
-            <tr>
-                <td class="text-center">Quarta-Feira</td>
-                <td class="text-center" id="curso"> </td>
-                <td class="text-center" id="materia-dois"></td>
-                <td class="text-center" id="turma"> </td>
-                <td class="text-center">
-                    08:15 - 09:30 </td>
-            </tr>
-            <tr>
-                <td class="text-center">Quarta-Feira</td>
-                <td class="text-center" id="curso"></td>
-                <td class="text-center" id="materia-dois"></td>
-                <td class="text-center" id="turma"></td>
-                <td class="text-center">
-                    09:45 - 11:00 </td>
-            </tr>
-            <tr>
-                <td class="text-center">Sexta-Feira</td>
-                <td class="text-center" id="curso"> </td>
-                <td class="text-center" id="materia-tres"></td>
-                <td class="text-center" id="turma"> </td>
-                <td class="text-center">
-                    08:15 - 09:30 </td>
-            </tr>
-            <tr>
-                <td class="text-center">Sexta-Feira</td>
-                <td class="text-center" id="curso"></td>
-                <td class="text-center" id="materia-tres"></td>
-                <td class="text-center" id="turma"></td>
-                <td class="text-center">
-                    09:45 - 11:00 </td>
-            </tr>
         </tbody>
     </table>
 
+    <div id="grade-mensagem" style="text-align: center; margin-top: 15px;"></div>
+
     <script>
-        const area = localStorage.getItem('cursoEscolhido');
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+            const mensagemElemento = document.getElementById("grade-mensagem");
+            const tbodyDisc = document.getElementById("tbody-disc");
 
-        const colunasCurso = document.querySelectorAll('[id="curso"]');
-        colunasCurso.forEach(celula => {
-            celula.textContent = area;
+            if (!token) {
+                if (mensagemElemento) {
+                    mensagemElemento.textContent = "Sessão expirada ou inválida. Faça login novamente.";
+                }
+                // Limpa o corpo da tabela e insere uma mensagem informativa
+                tbodyDisc.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 20px; font-style: italic;">Você precisa estar logado para ver a grade.</td></tr>';
+                return;
+            }
+
+            async function fetchGrade() {
+                const seuEndpointDaApi = '/api/grades'; // Ajuste se sua API estiver em outro host/porta
+
+                if (mensagemElemento) {
+                    mensagemElemento.textContent = "Buscando dados da grade...";
+                }
+                // Mensagem de carregamento dentro da tabela
+                tbodyDisc.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 20px;">Carregando grade...</td></tr>';
+
+                try {
+                    const response = await fetch(seuEndpointDaApi, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        let errorMessage = `Erro HTTP: ${response.status} ${response.statusText}`;
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.message || errorData.error || errorMessage;
+                        } catch (e) { /* Usa erro HTTP padrão se o corpo do erro não for JSON */ }
+                        throw new Error(errorMessage);
+                    }
+
+                    const gradeData = await response.json();
+                    if (mensagemElemento) mensagemElemento.textContent = ""; // Limpa mensagem de "buscando" se sucesso
+                    return gradeData;
+
+                } catch (error) {
+                    console.error("Falha ao buscar grade do backend:", error);
+                    if (mensagemElemento) {
+                        mensagemElemento.textContent = `Erro ao carregar grade: ${error.message}`;
+                    }
+                    // Mensagem de erro dentro da tabela
+                    tbodyDisc.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 20px; color: red;">Erro ao carregar grade: ${error.message}</td></tr>`;
+                    return []; // Retorna array vazio em caso de erro para a próxima função lidar
+                }
+            }
+
+            function renderGradeTable(gradeItems) {
+                tbodyDisc.innerHTML = ""; // Limpa a tabela (inclusive a msg de carregando/erro do fetch)
+
+                if (!gradeItems || gradeItems.length === 0) {
+                    if (mensagemElemento.textContent === "") { // Só atualiza se não houver mensagem de erro do fetch
+                        mensagemElemento.textContent = "Nenhuma matéria encontrada na sua grade.";
+                    }
+                    // Mensagem de "sem dados" dentro da tabela
+                    const tr = tbodyDisc.insertRow();
+                    const td = tr.insertCell();
+                    td.setAttribute("colspan", "5");
+                    td.textContent = "Nenhuma matéria para exibir.";
+                    td.classList.add("text-center"); // Aplica sua classe CSS
+                    td.style.padding = "20px"; // Estilo inline para garantir o espaçamento
+                    td.style.fontStyle = "italic";
+                    return;
+                }
+
+                // Agrupa por Dia da Semana
+                const groupedByDay = gradeItems.reduce((acc, item) => {
+                    const day = item["DIA DA SEMANA"] || "Dia não especificado"; // Usa a chave exata do backend
+                    if (!acc[day]) {
+                        acc[day] = [];
+                    }
+                    acc[day].push(item);
+                    return acc;
+                }, {});
+
+                // Define a ordem de exibição dos dias da semana
+                const orderOfDays = ["Segunda-Feira", "Terça-Feira", "Quarta-Feira", "Quinta-Feira", "Sexta-Feira", "Sábado", "Domingo"];
+
+                let hasContent = false;
+                orderOfDays.forEach(day => {
+                    if (groupedByDay[day]) {
+                        hasContent = true;
+                        // Ordena as matérias do dia pelo horário
+                        groupedByDay[day].sort((a, b) => {
+                            const horarioA = a["HORÁRIO"] || ""; // Usa a chave exata do backend
+                            const horarioB = b["HORÁRIO"] || ""; // Usa a chave exata do backend
+                            return horarioA.localeCompare(horarioB); // Comparação de string para horários
+                        });
+
+                        groupedByDay[day].forEach(item => {
+                            const tr = tbodyDisc.insertRow();
+                            // Preenche as células com os dados, usando as chaves exatas do backend
+                            (tr.insertCell().textContent = item["DIA DA SEMANA"] || '');
+                            (tr.insertCell().textContent = item["CURSO"] || '');
+                            (tr.insertCell().textContent = item["MATÉRIA"] || '');
+                            (tr.insertCell().textContent = item["TURMA"] || '');
+                            (tr.insertCell().textContent = item["HORÁRIO"] || '');
+
+                            // Adiciona a classe 'text-center' a todas as células criadas
+                            for (let i = 0; i < tr.cells.length; i++) {
+                                tr.cells[i].classList.add("text-center");
+                            }
+                        });
+                    }
+                });
+
+                if (!hasContent && mensagemElemento.textContent === "") {
+                    mensagemElemento.textContent = "Os dados recebidos não correspondem a dias válidos para exibição.";
+                } else if (hasContent && (mensagemElemento.textContent === "Buscando dados da grade..." || mensagemElemento.textContent === "Carregando grade...")) {
+                    mensagemElemento.textContent = ""; // Limpa mensagem de carregamento se tudo ocorreu bem e há conteúdo
+                }
+            }
+
+            // Inicia o processo
+            fetchGrade().then(gradeData => {
+                renderGradeTable(gradeData);
+            });
+            // O .catch para o fetchGrade já está dentro da própria função,
+            // então não precisamos de outro .catch aqui a menos que haja lógica adicional.
         });
-
     </script>
 
 </body>
-
-
 
 </html>

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const Nota = require('../models/notaModel'); // Ajuste o caminho conforme sua estrutura

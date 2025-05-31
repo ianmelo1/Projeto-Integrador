@@ -8,13 +8,14 @@ async function seed() {
     await connectDB(); // Conecta ao MongoDB antes de fazer qualquer operação
 
     console.log('--- Iniciando Seed de Usuários ---');
+       await User.deleteMany({});
     const usersData = [
       {
         nome: "Eduardo",
         email: "eduardo@gmail.com",
-        password: "171172", 
+        password: "171172",
         matricula: "2412130074",
-        curso: "Segurança da Informação", 
+        curso: "Segurança da Informação",
         telefone: "(61)0000-0000",
         cargaHoraria: 3600,
         semestre: 1,
@@ -22,7 +23,7 @@ async function seed() {
       {
         nome: "Carol",
         email: "carolinelopes@gmail.com",
-        password: "123456", 
+        password: "123456",
         role: "admin",
         matricula: "2412130073",
         curso: "Inteligência Artificial",
@@ -33,7 +34,7 @@ async function seed() {
       {
         nome: "Ian",
         email: "ianmelo@gmail.com",
-        password: "010203", 
+        password: "010203",
         role: "admin",
         matricula: "2412130071",
         curso: "Desenvolvimento Web",
@@ -44,7 +45,7 @@ async function seed() {
       {
         nome: "Miguel",
         email: "miguel@gmail.com",
-        password: "121314", 
+        password: "121314",
         role: "admin",
         matricula: "2412130072",
         curso: "Ciência de Dados",
@@ -77,24 +78,24 @@ async function seed() {
 
     const estruturaCursos = {
       'Segurança da Informação': [
-        { nomeMateria: 'Criptografia' },
-        { nomeMateria: 'Gestão de Riscos' },
-        { nomeMateria: 'Segurança de Redes' },
+        { nomeMateria: 'Criptografia', turma: 'A1', diaDaSemana: 'Segunda-Feira' },
+        { nomeMateria: 'Gestão de Riscos', turma: 'A1', diaDaSemana: 'Quarta-Feira' },
+        { nomeMateria: 'Segurança de Redes', turma: 'A1', diaDaSemana: 'Sexta-Feira' },
       ],
       'Inteligência Artificial': [
-        { nomeMateria: 'Introdução à IA' },
-        { nomeMateria: 'Machine Learning' },
-        { nomeMateria: 'Redes Neurais' },
+        { nomeMateria: 'Introdução à IA', turma: 'B1', diaDaSemana: 'Segunda-Feira' },
+        { nomeMateria: 'Machine Learning', turma: 'B1', diaDaSemana: 'Quarta-Feira' },
+        { nomeMateria: 'Redes Neurais', turma: 'B1', diaDaSemana: 'Sexta-Feira' },
       ],
       'Desenvolvimento Web': [
-        { nomeMateria: 'HTML e CSS Avançado' },
-        { nomeMateria: 'JavaScript e Frameworks' },
-        { nomeMateria: 'Banco de Dados para Web' },
+        { nomeMateria: 'HTML e CSS Avançado', turma: 'E1', diaDaSemana: 'Segunda-Feira' },
+        { nomeMateria: 'JavaScript e Frameworks', turma: 'E1', diaDaSemana: 'Quarta-Feira' },
+        { nomeMateria: 'Banco de Dados para Web', turma: 'E1', diaDaSemana: 'Sexta-Feira' },
       ],
       'Ciência de Dados': [
-        { nomeMateria: 'Estatística Aplicada' },
-        { nomeMateria: 'Big Data' },
-        { nomeMateria: 'Visualização de Dados' },
+        { nomeMateria: 'Estatística Aplicada', turma: 'D1', diaDaSemana: 'Segunda-Feira' },
+        { nomeMateria: 'Big Data', turma: 'D1', diaDaSemana: 'Quarta-Feira' },
+        { nomeMateria: 'Visualização de Dados', turma: 'D1', diaDaSemana: 'Sexta-Feira' },
       ]
     };
 
@@ -115,10 +116,20 @@ async function seed() {
           nomeAluno: userInfo.nome,   // O nome do aluno, pego do 
           curso: userData.curso,
           semestre: userData.semestre,
-          materias: materiasDoCursoDefinido.map(materia => ({
-            nomeMateria: materia.nomeMateria,
-            nota: Math.random() < 0.1 ? null : parseFloat((Math.random() * 5 + 5).toFixed(1)),
-          })),
+          materias: materiasDoCursoDefinido.map((materia, index) => {
+            if (!materia.diaDaSemana) {
+              console.warn(`❌ Matéria sem diaDaSemana no índice ${index}:`, materia);
+            }
+            const n_passos = Math.floor(Math.random() * 11);
+            const frequenciaAleatoria = 50 + n_passos * 5;
+            return {
+              nomeMateria: materia?.nomeMateria,
+              diaDaSemana: materia?.diaDaSemana,
+              turma: materia?.turma,
+              nota: Math.random() < 0.1 ? null : parseFloat((Math.random() * 5 + 5).toFixed(1)),
+              frequenciaPercentual: frequenciaAleatoria
+            };
+          })
         });
       } else {
         console.log(`⚠️ Matérias para o curso "${userData.curso}" (aluno ${userData.nome}) não definidas na estruturaCursos. Boletim não criado.`);
