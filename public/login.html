@@ -51,11 +51,18 @@ document.getElementById('formLogin').addEventListener('submit', async function(e
       body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
-
-    if (data.token) {
+    const data = await response.json();    if (data.token) {
       localStorage.setItem('token', data.token);
-      window.location.href = 'segundapg.html';
+      
+      // Decodificar o token para obter as informações do usuário
+      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+      
+      // Redirecionar baseado na role do usuário
+      if (tokenPayload.role === 'professor') {
+        window.location.href = 'professor/dashboard.html';
+      } else {
+        window.location.href = 'segundapg.html';
+      }
     } else {
       alert('Email ou senha inválidos');
     }

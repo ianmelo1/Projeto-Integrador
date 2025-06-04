@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Professor</title>
+    <link rel="website icon" type="png" href="https://media-public.canva.com/ZlHMQ/MADhH6ZlHMQ/3/tl.png">
+    <style>
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .turmas-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .table-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .table-content {
+            padding: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+          th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .prioridade-alta {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .prioridade-media {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .prioridade-baixa {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 20px;
+        }
+        
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .detalhes-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        .detalhes-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .aluno-problema {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <button class="logout-btn" onclick="logout()">Sair</button>
+        
+        <div class="welcome-section">
+            <h1>Dashboard do Professor</h1>
+            <p id="welcomeMessage">Carregando informações...</p>
+        </div>
+        
+        <div class="stats-grid" id="statsGrid">
+            <!-- Estatísticas serão carregadas aqui -->
+        </div>
+        
+        <div class="turmas-table">
+            <div class="table-header">
+                Análise das Turmas - Prioridade para Monitoria
+            </div>
+            <div class="table-content">
+                <div id="loadingMessage" class="loading">Carregando análises das turmas...</div>
+                <div id="errorMessage" class="error" style="display: none;"></div>
+                <div id="tableContainer" style="display: none;">
+                    <table id="turmasTable">
+                        <thead>
+                            <tr>
+                                <th>Turma</th>
+                                <th>Matéria</th>
+                                <th>Curso</th>
+                                <th>Dia da Semana</th>
+                                <th>Total Alunos</th>
+                                <th>Média Notas</th>
+                                <th>Média Frequência</th>
+                                <th>Alunos c/ Problemas</th>
+                                <th>% Problemas</th>
+                                <th>Prioridade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="turmasTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para detalhes dos alunos -->
+    <div id="detalhesModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h2>Detalhes dos Alunos com Problemas</h2>
+            <div id="detalhesContent">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userData = null;
+        let turmasData = [];
+
+        // Verificar se o usuário está logado e é professor
+        function verificarAutenticacao() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '../login.html';
+                return false;
+            }
+            
+            try {
+                const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                
+                if (tokenPayload.role !== 'professor') {
+                    alert('Acesso negado. Área restrita para professores.');
+                    window.location.href = '../login.html';
+                    return false;
+                }
+                
+                userData = tokenPayload;
+                document.getElementById('welcomeMessage').textContent = `Bem-vindo, ${userData.nome}!`;
+                return true;
+            } catch (error) {
+                console.error('Erro ao decodificar token:', error);
+                window.location.href = '../login.html';
+                return false;
+            }
+        }
+
+        // Carregar análises das turmas
+        async function carregarAnalises() {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/professor/analises-turmas', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                turmasData = await response.json();
+                exibirAnalises(turmasData);
+                exibirEstatisticas(turmasData);
+                
+            } catch (error) {
+                console.error('Erro ao carregar análises:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Erro ao carregar dados. Tente novamente.';
+            }
+        }
+
+        // Exibir estatísticas gerais
+        function exibirEstatisticas(dados) {
+            const totalTurmas = dados.length;
+            const turmasAltaPrioridade = dados.filter(t => t.prioridadeMonitoria === 'Alta').length;
+            const mediaGeralNotas = dados.reduce((sum, t) => sum + t.mediaNotas, 0) / dados.length;
+            const totalAlunosProblemas = dados.reduce((sum, t) => sum + t.alunosComProblemas, 0);
+
+            const statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${totalTurmas}</div>
+                    <div>Total de Turmas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${turmasAltaPrioridade}</div>
+                    <div>Turmas Alta Prioridade</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${mediaGeralNotas.toFixed(1)}</div>
+                    <div>Média Geral das Notas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${totalAlunosProblemas}</div>
+                    <div>Alunos com Problemas</div>
+                </div>
+            `;
+            
+            document.getElementById('statsGrid').innerHTML = statsHTML;
+        }
+
+        // Exibir tabela de análises
+        function exibirAnalises(dados) {
+            const tbody = document.getElementById('turmasTableBody');
+            tbody.innerHTML = '';
+
+            dados.forEach((turma, index) => {
+                const row = document.createElement('tr');
+                
+                const prioridadeClass = turma.prioridadeMonitoria.toLowerCase().replace('é', 'e');
+                
+                row.innerHTML = `
+                    <td>${turma.turma}</td>
+                    <td>${turma.materia}</td>
+                    <td>${turma.curso}</td>
+                    <td>${turma.diaDaSemana}</td>
+                    <td>${turma.totalAlunos}</td>
+                    <td>${turma.mediaNotas.toFixed(1)}</td>
+                    <td>${turma.mediaFrequencia.toFixed(1)}%</td>
+                    <td>${turma.alunosComProblemas}</td>
+                    <td>${turma.percentualProblemas}%</td>
+                    <td><span class="prioridade-${prioridadeClass}">${turma.prioridadeMonitoria}</span></td>
+                    <td>
+                        <button class="detalhes-btn" onclick="mostrarDetalhes(${index})">
+                            Ver Detalhes
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+        }
+
+        // Mostrar detalhes dos alunos com problemas
+        function mostrarDetalhes(index) {
+            const turma = turmasData[index];
+            const modal = document.getElementById('detalhesModal');
+            const content = document.getElementById('detalhesContent');
+            
+            let detalhesHTML = `
+                <h3>${turma.turma} - ${turma.materia}</h3>
+                <p><strong>Curso:</strong> ${turma.curso}</p>
+                <p><strong>Total de alunos com problemas:</strong> ${turma.alunosComProblemas}</p>
+                <hr>
+            `;
+            
+            if (turma.detalhesAlunosProblemas.length === 0) {
+                detalhesHTML += '<p>Nenhum aluno com problemas identificados nesta turma.</p>';
+            } else {
+                detalhesHTML += '<h4>Alunos que precisam de atenção:</h4>';
+                turma.detalhesAlunosProblemas.forEach(aluno => {
+                    const problemas = [];
+                    if (aluno.nota !== null && aluno.nota < 7) {
+                        problemas.push(`Nota baixa: ${aluno.nota}`);
+                    }
+                    if (aluno.frequencia !== null && aluno.frequencia < 75) {
+                        problemas.push(`Frequência baixa: ${aluno.frequencia}%`);
+                    }
+                    
+                    detalhesHTML += `
+                        <div class="aluno-problema">
+                            <strong>${aluno.nome}</strong><br>
+                            <small>${problemas.join(' | ')}</small>
+                        </div>
+                    `;
+                });
+            }
+            
+            content.innerHTML = detalhesHTML;
+            modal.style.display = 'block';
+        }
+
+        // Fechar modal
+        function fecharModal() {
+            document.getElementById('detalhesModal').style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('detalhesModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '../login.html';
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            if (verificarAutenticacao()) {
+                carregarAnalises();
+            }
+        });
+    </script>
+</body>
+</html>

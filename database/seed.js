@@ -8,12 +8,24 @@ async function seed() {
     await connectDB(); // Conecta ao MongoDB antes de fazer qualquer operação
 
     console.log('--- Iniciando Seed de Usuários ---');
-       await User.deleteMany({});
+    await User.deleteMany({});    
     const usersData = [
       {
         nome: "Eduardo",
         email: "eduardo@gmail.com",
         password: "171172",
+        role: "aluno",
+        matricula: "2412130074",
+        curso: "Segurança da Informação",
+        telefone: "(61)0000-0000",
+        cargaHoraria: 3600,
+        semestre: 1,
+      },
+      {
+        nome: "Amanda",
+        email: "amanda@gmail.com",
+        password: "171172",
+        role: "aluno",
         matricula: "2412130074",
         curso: "Segurança da Informação",
         telefone: "(61)0000-0000",
@@ -24,7 +36,7 @@ async function seed() {
         nome: "Carol",
         email: "carolinelopes@gmail.com",
         password: "123456",
-        role: "admin",
+        role: "aluno",
         matricula: "2412130073",
         curso: "Inteligência Artificial",
         telefone: "(61)0000-0000",
@@ -35,7 +47,7 @@ async function seed() {
         nome: "Ian",
         email: "ianmelo@gmail.com",
         password: "010203",
-        role: "admin",
+        role: "aluno",
         matricula: "2412130071",
         curso: "Desenvolvimento Web",
         telefone: "(61)0000-0000",
@@ -46,12 +58,46 @@ async function seed() {
         nome: "Miguel",
         email: "miguel@gmail.com",
         password: "121314",
-        role: "admin",
+        role: "aluno",
         matricula: "2412130072",
         curso: "Ciência de Dados",
         telefone: "(61)0000-0000",
         cargaHoraria: 3600,
         semestre: 6,
+      },
+      // Professores
+      {
+        nome: "Prof. Ana Silva",
+        email: "ana.silva@prof.com",
+        password: "prof123",
+        role: "professor",
+        matricula: "PROF001",
+        curso: "Docente",
+        telefone: "(61)9999-1111",
+        cargaHoraria: 4000,
+        semestre: null,
+      },
+      {
+        nome: "Prof. Carlos Santos",
+        email: "carlos.santos@prof.com",
+        password: "prof456",
+        role: "professor",
+        matricula: "PROF002",
+        curso: "Docente",
+        telefone: "(61)9999-2222",
+        cargaHoraria: 4000,
+        semestre: null,
+      },
+      {
+        nome: "Prof. Maria Oliveira",
+        email: "maria.oliveira@prof.com",
+        password: "prof789",
+        role: "professor",
+        matricula: "PROF003",
+        curso: "Docente",
+        telefone: "(61)9999-3333",
+        cargaHoraria: 4000,
+        semestre: null,
       },
     ];
 
