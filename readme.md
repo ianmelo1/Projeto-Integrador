@@ -46,6 +46,7 @@ Este projeto foi desenvolvido como parte do Projeto Integrador na disciplina de 
 Caroline Lopes Martins  
 Eduardo Lima dos Santos  
 Ian Melo Gonçalves  
+Amanda Ferreira Dahm
 
 ## Link pelo Vercel:
 https://modelo-aqwc.vercel.app/
