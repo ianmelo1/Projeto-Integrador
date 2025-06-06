@@ -43,10 +43,10 @@ npm start
 Este projeto foi desenvolvido como parte do Projeto Integrador na disciplina de Estrutura de Dados, com foco em aplicar conceitos de organização de dados, segurança de acesso e boas práticas de desenvolvimento web no contexto da educação.
 
 ## Integrantes
+Amanda Ferreira Dahm  
 Caroline Lopes Martins  
 Eduardo Lima dos Santos  
 Ian Melo Gonçalves  
-Amanda Ferreira Dahm
 
 ## Link pelo Vercel:
 https://modelo-aqwc.vercel.app/
