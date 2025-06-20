@@ -61,6 +61,4 @@ connectDB();
 const PORT = 8080;
 app.listen(PORT, '0.0.0.0', () => { // Adicione '0.0.0.0'
   console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log('Teste com:');
-  console.log(`curl http://localhost:${PORT}/api/ping`);
 });
